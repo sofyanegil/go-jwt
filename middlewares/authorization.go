@@ -24,7 +24,7 @@ func ProductAuthorization() gin.HandlerFunc {
 
 		userData := c.MustGet("userData").(jwt.MapClaims)
 		userId := uint(userData["id"].(float64))
-
+		userRole := userData["role"]
 		Product := models.Product{}
 
 		err = db.Select("user_id").First(&Product, uint(productId)).Error
@@ -37,7 +37,7 @@ func ProductAuthorization() gin.HandlerFunc {
 			return
 		}
 
-		if Product.UserID != userId {
+		if Product.UserID != userId && userRole != "admin" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error":   "Unauthorized",
 				"message": "youre not allowed to access this data",

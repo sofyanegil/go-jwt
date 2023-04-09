@@ -70,3 +70,55 @@ func UpdateProduct(c *gin.Context) {
 
 	c.JSON(http.StatusOK, Product)
 }
+
+func GetProduct(c *gin.Context) {
+	db := database.GetDB()
+	contentType := helpers.GetContentType(c)
+	Product := models.Product{}
+	productId, _ := strconv.Atoi(c.Param("productId"))
+
+	if contentType == appJSON {
+		c.ShouldBindJSON(&Product)
+	} else {
+		c.ShouldBind(&Product)
+	}
+	err := db.First(&Product, "id = ?", productId).Error
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Bad Request",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, Product)
+}
+
+func DeleteProduct(c *gin.Context) {
+	db := database.GetDB()
+	contentType := helpers.GetContentType(c)
+	Product := models.Product{}
+
+	productID, _ := strconv.Atoi(c.Param("productId"))
+
+	if contentType == appJSON {
+		c.ShouldBindJSON(&Product)
+	} else {
+		c.ShouldBind(&Product)
+	}
+
+	err := db.Where("id = ?", productID).Delete(&Product).Error
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Bad Request",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Product deleted",
+	})
+}
