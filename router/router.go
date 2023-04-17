@@ -7,23 +7,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func StartApp() *gin.Engine {
+func StartApp(userControllers controllers.IUserControllers, productController controllers.IProductControllers) *gin.Engine {
 	r := gin.Default()
 
 	userRouter := r.Group("/users")
 	{
-		userRouter.POST("/register", controllers.UserRegister)
-		userRouter.POST("/login", controllers.UserLogin)
+		userRouter.POST("/register", userControllers.UserRegister)
+		userRouter.POST("/login", userControllers.UserLogin)
 
 	}
 
 	productRouter := r.Group("/products")
 	{
 		productRouter.Use(middlewares.Authentication())
-		productRouter.POST("/", controllers.CreateProduct)
-		productRouter.PUT("/:productId", middlewares.ProductAuthorization(), controllers.UpdateProduct)
-		productRouter.GET("/:productId", middlewares.ProductAuthorization(), controllers.GetProduct)
-		productRouter.DELETE("/:productId", middlewares.ProductAuthorization(), controllers.DeleteProduct)
+		productRouter.POST("/", productController.CreateProduct)
+		productRouter.GET("/", productController.ReadAllProduct)
+		productRouter.PUT("/:productId", middlewares.ProductAuthorization(), productController.UpdateProduct)
+		productRouter.GET("/:productId", middlewares.ProductAuthorization(), productController.ReadProduct)
+		productRouter.DELETE("/:productId", middlewares.ProductAuthorization(), productController.DeleteProduct)
 	}
 
 	return r
